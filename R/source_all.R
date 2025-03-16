@@ -49,29 +49,30 @@
 #'
 #' @export
 source_all <- function(path, pattern = "\\.R$", envir = NULL) {
+  # Set default environment to global if none provided
+  if (is.null(envir)) {
+    envir <- .GlobalEnv
+  }
+  
   # List files matching the pattern in the specified directory
-  files.sources = list.files(path = path, pattern = pattern, full.names = TRUE)
+  files.sources <- list.files(path = path, pattern = pattern, full.names = TRUE)
   
   # Provide feedback if no matching files are found
   if (length(files.sources) == 0) {
     message("No files matching the pattern were found in the specified directory.")
-    if (!is.null(envir)){
-      return(invisible(envir))}
-    else{
-      return(invisible(NULL))
-    }
-  }
-  
-  # Main commands applying source()
-  if (is.null(envir)) {
-    # Source into global environment
-    invisible(sapply(files.sources, source))
-    return(invisible(NULL))
-  } else {
-    # Source into specified environment
-    invisible(sapply(files.sources, function(file) {
-      sys.source(file, envir = envir)
-    }))
     return(invisible(envir))
   }
+  
+  # Use the appropriate source function based on environment
+  source_fn <- if (identical(envir, .GlobalEnv)) {
+    function(file) source(file)
+  } else {
+    function(file) sys.source(file, envir = envir)
+  }
+  
+  # Source all matching files
+  invisible(sapply(files.sources, source_fn))
+  
+  # Return the environment for potential chaining
+  return(invisible(envir))
 }
