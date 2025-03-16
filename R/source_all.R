@@ -1,37 +1,49 @@
 #' Source R Scripts with path relative to current working directory
 #'
-#' This function changes the working directory to the specified path, sources all R scripts (or files matching a given pattern) in that directory, and then restores the original working directory.
+#' @description
+#' Sources all R scripts (or files matching a specified pattern) from a given directory.
+#' This function is useful for batch loading multiple script files in a single command.
 #'
-#' @param path A character string specifying the directory to change to.
-#' @param pattern A regular expression string to match the filenames to be sourced. Defaults to \code{"\\.R$"} to source all R scripts.
+#' @param path A character string specifying the directory containing the R scripts to source.
+#' @param pattern A regular expression string to match the filenames to be sourced. 
+#'        Defaults to \code{"\\.R$"} which matches all files with the ".R" extension.
 #'
 #' @details
-#' This function allows users to batch source multiple R scripts from a specified directory. It temporarily changes the working directory to the given \code{path}, sources files matching the \code{pattern}, and then reverts to the original working directory.
+#' This function enables users to load multiple R scripts at once from a specified directory.
+#' It finds all files in the specified directory that match the given pattern and sources each one.
 #'
-#' @return Not applicable
+#' Note: This function cannot handle R scripts that contain code outside of function definitions.
+#' It is best used with files that define functions or variables without executing side effects.
+#'
+#' @return
+#' Returns \code{invisible(NULL)}. The primary effect is sourcing the files, not returning a value.
 #'
 #' @examples
-#' # Example usage:
-#' # Source all R scripts in a directory
-#' source_all("path/to/scripts")
+#' # Source all R files in a "helpers" subdirectory
+#' source_all("helpers")
 #'
-#' # Source files with a custom pattern (e.g., only files starting with 'test_')
-#' source_all("path/to/scripts", pattern = "^test_.*\\.R$")
+#' # Source only files with names starting with "util_" in the "utils" directory
+#' source_all("utils", pattern = "^util_.*\\.R$")
 #'
-#' @seealso \code{\link[base]{setwd}}, \code{\link[base]{list.files}}, \code{\link[base]{source}}
+#' # Source all R files in the parent directory
+#' source_all("..")
 #'
-#' @exports
-source_all<-function(path, pattern="\\.R$"){
+#' @seealso 
+#' \code{\link[base]{source}} for sourcing individual files
+#' \code{\link[base]{list.files}} for the underlying file listing mechanism
+#'
+#' @export
+source_all <- function(path, pattern = "\\.R$") {
+  # List files matching the pattern in the specified directory
+  files.sources = list.files(path = path, pattern = pattern, full.names = TRUE)
   
-  # current issues:
-    # cannot handle the case where the R file is just an R script and not a function
-  
-  # the main commands for source_all:
-  files.sources = list.files(path = path, pattern = pattern, full.names = T)
-  print(files.sources)
+  # Provide feedback if no matching files are found
   if (length(files.sources) == 0) {
     message("No files matching the pattern were found in the specified directory.")
   }
+  
+  # Source all matching files
   sapply(files.sources, source)
+  
   return(invisible(NULL))
 }
