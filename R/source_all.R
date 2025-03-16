@@ -20,17 +20,18 @@
 #'
 #' @seealso \code{\link[base]{setwd}}, \code{\link[base]{list.files}}, \code{\link[base]{source}}
 #'
-#' @export
-#'
+#' @exports
 source_all<-function(path, pattern="\\.R$"){
-  # source all
-  CurrentSourceWD<-getwd()
-  setwd(path)
-  files.sources = list.files(pattern = pattern)
+  
+  # current issues:
+    # cannot handle the case where the R file is just an R script and not a function
+  
+  # the main commands for source_all:
+  files.sources = list.files(path = path, pattern = pattern, full.names = T)
+  print(files.sources)
   if (length(files.sources) == 0) {
     message("No files matching the pattern were found in the specified directory.")
   }
   sapply(files.sources, source)
-  setwd(CurrentSourceWD)
   return(invisible(NULL))
 }
